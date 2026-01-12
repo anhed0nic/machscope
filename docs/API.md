@@ -16,7 +16,7 @@ let package = Package(
     dependencies: [
         .package(path: "/path/to/MachScope")
         // Or from git:
-        // .package(url: "https://github.com/your-repo/MachScope.git", from: "1.0.0")
+        // .package(url: "https://github.com/sadopc/machscope.git", from: "1.0.0")
     ],
     targets: [
         .target(

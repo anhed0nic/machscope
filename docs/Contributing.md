@@ -15,7 +15,7 @@ Thank you for your interest in contributing to MachScope!
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-repo/MachScope.git
+git clone https://github.com/sadopc/machscope.git
 cd MachScope
 
 # Build

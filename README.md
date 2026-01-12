@@ -49,7 +49,7 @@ swift run machscope parse /bin/ls --json
 ### Build from Source
 
 ```bash
-git clone https://github.com/your-username/MachScope.git
+git clone https://github.com/sadopc/machscope.git
 cd MachScope
 swift build -c release
 ```
@@ -136,7 +136,7 @@ Add MachScope to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/your-username/MachScope.git", from: "1.0.0")
+    .package(url: "https://github.com/sadopc/machscope.git", from: "1.0.0")
 ]
 ```
 

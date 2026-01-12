@@ -25,7 +25,7 @@ xcodebuild -version
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-repo/MachScope.git
+git clone https://github.com/sadopc/machscope.git
 cd MachScope
 ```
 
