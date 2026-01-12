@@ -35,3 +35,8 @@ DerivedData/
 # Test outputs
 TestResults/
 coverage/
+
+# Specify and Claude config
+specs/
+.claude/
+.specify/
