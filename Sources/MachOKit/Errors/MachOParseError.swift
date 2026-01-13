@@ -32,7 +32,7 @@ public enum MachOParseError: Error, Sendable {
   case emptyFatBinary
 
   /// Requested architecture not found in Fat binary
-  case architectureNotFound(String)
+  case architectureNotFound(requested: String, available: [String])
 
   /// Invalid load command size
   case invalidLoadCommandSize(offset: Int, size: UInt32)
@@ -85,8 +85,12 @@ extension MachOParseError: CustomStringConvertible {
       return "Invalid Fat binary magic: 0x\(String(found, radix: 16))"
     case .emptyFatBinary:
       return "Fat binary contains no architectures"
-    case .architectureNotFound(let arch):
-      return "Architecture '\(arch)' not found in Fat binary"
+    case .architectureNotFound(requested: let requested, available: let available):
+      if available.isEmpty {
+        return "Architecture '\(requested)' not found in Fat binary. Use --arch to specify a different architecture."
+      } else {
+        return "Architecture '\(requested)' not found in Fat binary. Available: \(available.joined(separator: ", ")). Use --arch to specify."
+      }
     case .invalidLoadCommandSize(let offset, let size):
       return "Invalid load command size \(size) at offset \(offset)"
     case .symbolNotFound(let name):
@@ -110,5 +114,13 @@ extension MachOParseError: CustomStringConvertible {
     case .invalidEntitlementsFormat(let reason):
       return "Invalid entitlements format: \(reason)"
     }
+  }
+}
+
+// MARK: - LocalizedError Conformance
+
+extension MachOParseError: LocalizedError {
+  public var errorDescription: String? {
+    description
   }
 }

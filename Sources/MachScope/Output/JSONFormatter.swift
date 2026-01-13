@@ -54,11 +54,19 @@ public struct JSONFormatter: Sendable {
     // Symbols
     if options.showSymbols, let symbols = binary.symbols {
       let filtered = symbols.filter { !$0.isDebugSymbol }
+      let limit = options.limit ?? 100
+      let entries: [[String: Any]]
+      if limit == 0 {
+        entries = filtered.map { formatSymbol($0) }
+      } else {
+        entries = filtered.prefix(limit).map { formatSymbol($0) }
+      }
       dict["symbols"] = [
         "total": symbols.count,
         "defined": filtered.filter { $0.isDefined }.count,
         "undefined": filtered.filter { !$0.isDefined }.count,
-        "entries": filtered.prefix(100).map { formatSymbol($0) },
+        "entries": entries,
+        "limited": limit > 0 && filtered.count > limit,
       ]
     }
 
@@ -88,12 +96,20 @@ public struct JSONFormatter: Sendable {
         // Group by section for better organization
         let grouped = Dictionary(grouping: strings) { $0.section }
         var sectionData: [[String: Any]] = []
+        let limit = options.limit ?? 100
 
         for (section, sectionStrings) in grouped.sorted(by: { $0.key < $1.key }) {
+          let entries: [[String: Any]]
+          if limit == 0 {
+            entries = sectionStrings.map { formatExtractedString($0) }
+          } else {
+            entries = sectionStrings.prefix(limit).map { formatExtractedString($0) }
+          }
           sectionData.append([
             "section": section,
             "count": sectionStrings.count,
-            "entries": sectionStrings.map { formatExtractedString($0) },
+            "entries": entries,
+            "limited": limit > 0 && sectionStrings.count > limit,
           ])
         }
 

@@ -35,6 +35,21 @@ public struct ParseCommand: Sendable {
       colorMode = .auto
     }
 
+    // Parse limit option
+    let limit: Int?
+    if let limitStr = args.option("limit") {
+      if limitStr.lowercased() == "all" || limitStr == "0" {
+        limit = 0  // 0 means unlimited
+      } else if let parsedLimit = Int(limitStr), parsedLimit > 0 {
+        limit = parsedLimit
+      } else {
+        fputs("Warning: Invalid --limit value '\(limitStr)', using default\n", stderr)
+        limit = nil
+      }
+    } else {
+      limit = nil
+    }
+
     // Determine what to show
     let options = FormatOptions(
       showHeaders: args.hasFlag("all") || args.hasFlag("headers") || !hasAnyDetailFlag(args),
@@ -44,7 +59,8 @@ public struct ParseCommand: Sendable {
       showDylibs: args.hasFlag("all") || args.hasFlag("dylibs") || !hasAnyDetailFlag(args),
       showStrings: args.hasFlag("all") || args.hasFlag("strings"),
       showSignature: args.hasFlag("all") || args.hasFlag("signatures") || args.hasFlag("signature"),
-      showEntitlements: args.hasFlag("all") || args.hasFlag("entitlements")
+      showEntitlements: args.hasFlag("all") || args.hasFlag("entitlements"),
+      limit: limit
     )
 
     // Determine architecture
@@ -139,6 +155,7 @@ public struct ParseCommand: Sendable {
           --json, -j                  Output in JSON format
           --arch <arch>               Architecture to parse (arm64, x86_64)
           --color <mode>              Color output: auto, always, never
+          --limit <n>                 Limit symbols/strings output (0 or 'all' for unlimited)
           --all                       Show all information
           --headers                   Show Mach-O header
           --load-commands             Show load commands summary
@@ -154,7 +171,8 @@ public struct ParseCommand: Sendable {
           machscope parse /bin/ls --json
           machscope parse /bin/ls --all
           machscope parse /bin/ls --symbols --dylibs
-          machscope parse /bin/ls --symbols --strings --json
+          machscope parse /bin/ls --symbols --limit 100
+          machscope parse /bin/ls --symbols --limit 0       # Show all symbols
       """)
   }
 }

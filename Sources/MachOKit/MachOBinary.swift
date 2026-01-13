@@ -72,7 +72,10 @@ public struct MachOBinary: Sendable {
       let fatHeader = try FatHeader.parse(from: reader)
 
       guard let arch = fatHeader.architecture(for: architecture) else {
-        throw MachOParseError.architectureNotFound(architecture.description)
+        throw MachOParseError.architectureNotFound(
+          requested: architecture.description,
+          available: fatHeader.availableArchitectureNames
+        )
       }
 
       // Create a slice reader for this architecture

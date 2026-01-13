@@ -158,4 +158,14 @@ public struct FatHeader: Sendable {
   public var preferredArchitecture: FatArch? {
     architecture(for: .arm64) ?? architectures.first
   }
+
+  /// Get a list of available architecture names
+  public var availableArchitectureNames: [String] {
+    architectures.map { $0.cpuType.description }
+  }
+
+  /// Get a formatted string of available architectures
+  public var availableArchitecturesDescription: String {
+    availableArchitectureNames.joined(separator: ", ")
+  }
 }

@@ -115,10 +115,11 @@ public struct ArgumentParser: Sendable {
   private func isBooleanFlag(_ name: String) -> Bool {
     let booleanFlags = [
       // General flags
-      "json", "verbose", "v", "help", "h",
+      "json", "verbose", "v", "help", "h", "version",
       // Parse command flags
       "all", "headers", "load-commands",
       "segments", "sections", "symbols", "dylibs",
+      "strings", "signatures", "signature", "entitlements",
       // Disasm command flags
       "show-bytes", "b", "no-address", "no-demangle", "no-pac",
       "list-functions",

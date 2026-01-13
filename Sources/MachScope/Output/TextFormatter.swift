@@ -112,7 +112,8 @@ public struct TextFormatter: Sendable {
     // Symbols
     if options.showSymbols {
       if let symbols = binary.symbols {
-        output.append(formatSymbols(symbols))
+        let symbolLimit = options.limit ?? 50
+        output.append(formatSymbols(symbols, limit: symbolLimit))
         output.append("")
       }
     }
@@ -130,7 +131,8 @@ public struct TextFormatter: Sendable {
     if options.showStrings {
       let extractor = StringExtractor(binary: binary)
       if let strings = try? extractor.extractAllStrings() {
-        output.append(formatStrings(strings))
+        let stringLimit = options.limit ?? 100
+        output.append(formatStrings(strings, limit: stringLimit))
         output.append("")
       }
     }
@@ -225,6 +227,9 @@ public struct TextFormatter: Sendable {
   }
 
   /// Format symbol table
+  /// - Parameters:
+  ///   - symbols: Array of symbols to format
+  ///   - limit: Maximum number of symbols to show. 0 = unlimited
   public func formatSymbols(_ symbols: [Symbol], limit: Int = 50) -> String {
     var lines: [String] = []
 
@@ -235,11 +240,15 @@ public struct TextFormatter: Sendable {
     lines.append(
       "  Total: \(symbols.count) (defined: \(defined.count), undefined: \(undefined.count))")
 
-    // Show first N defined symbols
-    let displaySymbols = Array(defined.prefix(limit))
+    // Show symbols (0 = unlimited)
+    let displaySymbols = limit == 0 ? defined : Array(defined.prefix(limit))
     if !displaySymbols.isEmpty {
       lines.append("")
-      lines.append("  Defined symbols (first \(displaySymbols.count)):")
+      if limit == 0 || displaySymbols.count == defined.count {
+        lines.append("  Defined symbols (\(displaySymbols.count)):")
+      } else {
+        lines.append("  Defined symbols (first \(displaySymbols.count)):")
+      }
       for symbol in displaySymbols {
         let addr = color(String(format: "0x%016llX", symbol.address), ANSIColors.address)
         let type = symbol.isExternal ? "T" : "t"
@@ -248,8 +257,8 @@ public struct TextFormatter: Sendable {
       }
     }
 
-    if defined.count > limit {
-      lines.append("    ... and \(defined.count - limit) more")
+    if limit > 0 && defined.count > limit {
+      lines.append("    ... and \(defined.count - limit) more (use --limit 0 to show all)")
     }
 
     return lines.joined(separator: "\n")
@@ -269,6 +278,9 @@ public struct TextFormatter: Sendable {
   }
 
   /// Format extracted strings
+  /// - Parameters:
+  ///   - strings: Array of extracted strings to format
+  ///   - limit: Maximum number of strings to show per section. 0 = unlimited
   public func formatStrings(_ strings: [ExtractedString], limit: Int = 100) -> String {
     var lines: [String] = []
 
@@ -283,7 +295,7 @@ public struct TextFormatter: Sendable {
       lines.append(
         "  Section: \(color(section, ANSIColors.info)) (\(sectionStrings.count) strings)")
 
-      let displayStrings = Array(sectionStrings.prefix(limit))
+      let displayStrings = limit == 0 ? sectionStrings : Array(sectionStrings.prefix(limit))
       for string in displayStrings {
         let offsetStr = color(String(format: "0x%08X", string.offset), ANSIColors.address)
         // Escape special characters for display
@@ -291,8 +303,8 @@ public struct TextFormatter: Sendable {
         lines.append("    \(offsetStr): \"\(escaped)\"")
       }
 
-      if sectionStrings.count > limit {
-        lines.append("    ... and \(sectionStrings.count - limit) more")
+      if limit > 0 && sectionStrings.count > limit {
+        lines.append("    ... and \(sectionStrings.count - limit) more (use --limit 0 to show all)")
       }
     }
 
@@ -426,6 +438,8 @@ public struct FormatOptions: Sendable {
   public var showStrings: Bool = false
   public var showSignature: Bool = false
   public var showEntitlements: Bool = false
+  /// Limit for symbols/strings output. nil = use default (50), 0 = unlimited
+  public var limit: Int? = nil
 
   public init(
     showHeaders: Bool = true,
@@ -435,7 +449,8 @@ public struct FormatOptions: Sendable {
     showDylibs: Bool = true,
     showStrings: Bool = false,
     showSignature: Bool = false,
-    showEntitlements: Bool = false
+    showEntitlements: Bool = false,
+    limit: Int? = nil
   ) {
     self.showHeaders = showHeaders
     self.showLoadCommands = showLoadCommands
@@ -445,5 +460,6 @@ public struct FormatOptions: Sendable {
     self.showStrings = showStrings
     self.showSignature = showSignature
     self.showEntitlements = showEntitlements
+    self.limit = limit
   }
 }

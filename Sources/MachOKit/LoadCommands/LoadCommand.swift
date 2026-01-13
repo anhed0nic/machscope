@@ -25,6 +25,7 @@ public enum LoadCommandType: UInt32, Sendable, Codable, CustomStringConvertible 
   // Dynamic linker info
   case loadDylinker = 0x0E  // LC_LOAD_DYLINKER
   case idDylinker = 0x0F  // LC_ID_DYLINKER
+  case dyldInfoOnly = 0x8000_0022  // LC_DYLD_INFO_ONLY (0x22 | LC_REQ_DYLD)
 
   // Code signature and related
   case codeSignature = 0x1D  // LC_CODE_SIGNATURE
@@ -70,6 +71,7 @@ public enum LoadCommandType: UInt32, Sendable, Codable, CustomStringConvertible 
     case .idDylib: return "LC_ID_DYLIB"
     case .loadDylinker: return "LC_LOAD_DYLINKER"
     case .idDylinker: return "LC_ID_DYLINKER"
+    case .dyldInfoOnly: return "LC_DYLD_INFO_ONLY"
     case .codeSignature: return "LC_CODE_SIGNATURE"
     case .functionStarts: return "LC_FUNCTION_STARTS"
     case .dataInCode: return "LC_DATA_IN_CODE"
@@ -230,7 +232,7 @@ public struct LoadCommand: Sendable {
       case .loadDylinker, .idDylinker:
         try .dylinker(DylinkerCommand.parse(from: reader, at: offset, size: size))
       case .codeSignature, .functionStarts, .dataInCode, .segmentSplitInfo,
-        .dyldExportsTrie, .dyldChainedFixups:
+        .dyldExportsTrie, .dyldChainedFixups, .dyldInfoOnly:
         try .linkeditData(LinkeditDataCommand.parse(from: reader, at: offset))
       case .main:
         try .main(EntryPointCommand.parse(from: reader, at: offset))
