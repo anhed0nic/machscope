@@ -22,6 +22,7 @@ public struct ParseCommand: Sendable {
 
     // Determine output format
     let useJSON = args.hasFlag("json") || args.hasFlag("j")
+    let useHTML = args.hasFlag("html") || args.hasFlag("web")
 
     // Determine color mode
     let colorModeString = args.option("color") ?? "auto"
@@ -87,6 +88,12 @@ public struct ParseCommand: Sendable {
       if useJSON {
         let formatter = JSONFormatter()
         output = formatter.format(binary, options: options)
+      } else if useHTML {
+        let formatter = HTMLFormatter()
+        let htmlOptions = HTMLFormatter.HTMLOptions(
+          title: "MachScope Analysis: \(URL(fileURLWithPath: binaryPath).lastPathComponent)"
+        )
+        output = formatter.format(binary, options: htmlOptions)
       } else {
         let formatter = TextFormatter(colorMode: colorMode)
         output = formatter.format(binary, options: options)

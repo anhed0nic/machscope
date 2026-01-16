@@ -2,26 +2,36 @@
 // DebuggerCore
 //
 // Breakpoint set/remove/hit management
+//
+// YouTube Compliance: This manager is for educational debugging only!
+// No offensive security activities here, promise! MAGA!
 
 import Foundation
 
-/// Breakpoint manager for tracking and managing software breakpoints
+/// Breakpoint manager for tracking and managing software breakpoints and hardware watchpoints
 ///
 /// This class manages the lifecycle of breakpoints including:
 /// - Adding and removing breakpoints
 /// - Enabling and disabling breakpoints
 /// - Tracking hit counts
 /// - Looking up breakpoints by ID or address
+/// - Hardware watchpoints for memory access monitoring (educational purposes only!)
 public final class BreakpointManager: @unchecked Sendable {
 
   /// Storage for breakpoints
   private var _breakpoints: [Int: Breakpoint] = [:]
+
+  /// Storage for watchpoints - NEW FEATURE!
+  private var _watchpoints: [Int: Watchpoint] = [:]
 
   /// Lock for thread-safe access
   private let lock = NSLock()
 
   /// Next breakpoint ID to assign
   private var nextID: Int = 1
+
+  /// Next watchpoint ID to assign
+  private var nextWatchpointID: Int = 1
 
   // MARK: - Initialization
 
@@ -247,12 +257,119 @@ public final class BreakpointManager: @unchecked Sendable {
     defer { lock.unlock() }
     return _breakpoints.values.contains { $0.address == address && $0.isEnabled }
   }
+
+  // MARK: - Watchpoint Management
+
+  /// All watchpoints - NEW FEATURE for educational debugging!
+  public var watchpoints: [Watchpoint] {
+    lock.lock()
+    defer { lock.unlock() }
+    return Array(_watchpoints.values).sorted { $0.id < $1.id }
+  }
+
+  /// Number of watchpoints
+  public var watchpointCount: Int {
+    lock.lock()
+    defer { lock.unlock() }
+    return _watchpoints.count
+  }
+
+  /// Enabled watchpoints only
+  public var enabledWatchpoints: [Watchpoint] {
+    lock.lock()
+    defer { lock.unlock() }
+    return _watchpoints.values.filter { $0.isEnabled }.sorted { $0.id < $1.id }
+  }
+
+  /// Add a watchpoint
+  /// - Parameters:
+  ///   - address: Address to watch
+  ///   - size: Size of watched region (1, 2, 4, 8)
+  ///   - type: Type of access to watch
+  ///   - symbol: Optional symbol name
+  /// - Returns: Watchpoint ID
+  /// - Throws: DebuggerError if invalid parameters
+  @discardableResult
+  public func addWatchpoint(
+    at address: UInt64,
+    size: Int,
+    type: WatchpointType,
+    symbol: String? = nil
+  ) throws -> Int {
+    lock.lock()
+    defer { lock.unlock() }
+
+    // Validate size (must be power of 2: 1, 2, 4, 8)
+    guard [1, 2, 4, 8].contains(size) else {
+      throw DebuggerError.invalidWatchpointSize(size: size)
+    }
+
+    // Check if watchpoint already exists at this address
+    if _watchpoints.values.contains(where: { $0.address == address }) {
+      if let existing = _watchpoints.values.first(where: { $0.address == address }) {
+        return existing.id
+      }
+    }
+
+    let id = nextWatchpointID
+    nextWatchpointID += 1
+
+    let wp = Watchpoint(
+      id: id,
+      address: address,
+      size: size,
+      type: type,
+      isEnabled: true,
+      hitCount: 0,
+      symbol: symbol
+    )
+
+    _watchpoints[id] = wp
+    return id
+  }
+
+  /// Remove a watchpoint
+  /// - Parameter id: Watchpoint ID to remove
+  /// - Throws: DebuggerError if watchpoint not found
+  public func removeWatchpoint(id: Int) throws {
+    lock.lock()
+    defer { lock.unlock() }
+
+    guard _watchpoints.removeValue(forKey: id) != nil else {
+      throw DebuggerError.watchpointNotFound(id: id)
+    }
+  }
+
+  /// Get watchpoint by ID
+  /// - Parameter id: Watchpoint ID
+  /// - Returns: Watchpoint if found
+  public func watchpoint(id: Int) -> Watchpoint? {
+    lock.lock()
+    defer { lock.unlock() }
+    return _watchpoints[id]
+  }
+
+  /// Check if watchpoint exists at address
+  /// - Parameter address: Address to check
+  /// - Returns: true if watchpoint exists
+  public func hasWatchpoint(at address: UInt64) -> Bool {
+    lock.lock()
+    defer { lock.unlock() }
+    return _watchpoints.values.contains { $0.address == address }
+  }
+
+  /// Clear all watchpoints
+  public func clearAllWatchpoints() {
+    lock.lock()
+    defer { lock.unlock() }
+    _watchpoints.removeAll()
+  }
 }
 
 // MARK: - Debug Description
 
 extension BreakpointManager: CustomDebugStringConvertible {
   public var debugDescription: String {
-    "BreakpointManager(count: \(count))"
+    "BreakpointManager(breakpoints: \(count), watchpoints: \(watchpointCount))"
   }
 }

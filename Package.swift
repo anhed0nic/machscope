@@ -11,7 +11,9 @@ let package = Package(
         .executable(name: "machscope", targets: ["MachScope"]),
         .library(name: "MachOKit", targets: ["MachOKit"]),
         .library(name: "Disassembler", targets: ["Disassembler"]),
-        .library(name: "DebuggerCore", targets: ["DebuggerCore"])
+        .library(name: "DebuggerCore", targets: ["DebuggerCore"]),
+        .library(name: "Decompiler", targets: ["Decompiler"]),
+        .library(name: "Plugins", targets: ["Plugins"])
     ],
     targets: [
         // Core Mach-O parsing library
@@ -40,10 +42,28 @@ let package = Package(
             ]
         ),
 
+        // Basic decompiler for pseudo-code generation
+        .target(
+            name: "Decompiler",
+            dependencies: ["MachOKit", "Disassembler"],
+            swiftSettings: [
+                .enableExperimentalFeature("StrictConcurrency")
+            ]
+        ),
+
+        // Plugin system for extensibility
+        .target(
+            name: "Plugins",
+            dependencies: ["MachOKit"],
+            swiftSettings: [
+                .enableExperimentalFeature("StrictConcurrency")
+            ]
+        ),
+
         // CLI executable
         .executableTarget(
             name: "MachScope",
-            dependencies: ["MachOKit", "Disassembler", "DebuggerCore"],
+            dependencies: ["MachOKit", "Disassembler", "DebuggerCore", "Decompiler", "Plugins"],
             swiftSettings: [
                 .enableExperimentalFeature("StrictConcurrency")
             ]

@@ -43,6 +43,12 @@ public enum DebuggerError: Error, Sendable {
   /// Breakpoint not found
   case breakpointNotFound(id: Int)
 
+  /// Invalid watchpoint size (must be 1, 2, 4, 8)
+  case invalidWatchpointSize(size: Int)
+
+  /// Watchpoint not found
+  case watchpointNotFound(id: Int)
+
   /// Memory read failed
   case memoryReadFailed(address: UInt64, size: Int)
 
@@ -83,6 +89,10 @@ extension DebuggerError: CustomStringConvertible {
       return "Invalid breakpoint address: 0x\(String(address, radix: 16))"
     case .breakpointNotFound(let id):
       return "Breakpoint not found: \(id)"
+    case .invalidWatchpointSize(let size):
+      return "Invalid watchpoint size: \(size) (must be 1, 2, 4, or 8)"
+    case .watchpointNotFound(let id):
+      return "Watchpoint not found: \(id)"
     case .memoryReadFailed(let address, let size):
       return "Failed to read \(size) bytes at 0x\(String(address, radix: 16))"
     case .memoryWriteFailed(let address, let size):

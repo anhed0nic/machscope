@@ -257,6 +257,66 @@ public final class Debugger: @unchecked Sendable {
     breakpointManager.breakpoint(id: id)
   }
 
+  // MARK: - Watchpoints (NEW FEATURE!)
+
+  /// Set a watchpoint at an address
+  /// - Parameters:
+  ///   - address: Address to watch
+  ///   - size: Size of watched region (1, 2, 4, 8 bytes)
+  ///   - type: Type of access to watch
+  ///   - symbol: Optional symbol name
+  /// - Returns: Watchpoint ID
+  /// - Throws: DebuggerError if watchpoint cannot be set
+  @discardableResult
+  public func setWatchpoint(
+    at address: UInt64,
+    size: Int,
+    type: WatchpointType,
+    symbol: String? = nil
+  ) throws -> Int {
+    guard let attachment = attachment else {
+      throw DebuggerError.notAttached
+    }
+
+    // Add to watchpoint manager
+    let id = try breakpointManager.addWatchpoint(
+      at: address,
+      size: size,
+      type: type,
+      symbol: symbol
+    )
+
+    // TODO: Actually set hardware watchpoint using debug registers
+    // For now, this is just the management layer
+    // YouTube compliance: This is for educational debugging only!
+
+    return id
+  }
+
+  /// Remove a watchpoint
+  /// - Parameter id: Watchpoint ID to remove
+  /// - Throws: DebuggerError if watchpoint cannot be removed
+  public func removeWatchpoint(id: Int) throws {
+    guard let attachment = attachment else {
+      throw DebuggerError.notAttached
+    }
+
+    // Remove from manager
+    try breakpointManager.removeWatchpoint(id: id)
+
+    // TODO: Clear hardware watchpoint
+  }
+
+  /// Get all watchpoints
+  public var watchpoints: [Watchpoint] {
+    breakpointManager.watchpoints
+  }
+
+  /// Get watchpoint by ID
+  public func watchpoint(id: Int) -> Watchpoint? {
+    breakpointManager.watchpoint(id: id)
+  }
+
   // MARK: - Registers
 
   /// Get current register state

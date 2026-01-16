@@ -39,6 +39,11 @@ func printUsage() {
     COMMANDS:
         parse <binary>              Parse Mach-O binary structure
         disasm <binary>             Disassemble ARM64 code
+        diff <binary1> <binary2>    Compare two binaries (NEW!)
+        decompile <binary>          Generate pseudo-code (EXPERIMENTAL!)
+        swift <binary>              Analyze Swift metadata (NEW!)
+        profile <binary>            Performance profiling (NEW!)
+        plugin <command>            Execute plugin commands (NEW!)
         check-permissions           Check system permissions
         debug <pid>                 Attach to running process
 
@@ -87,6 +92,26 @@ case "parse":
 
 case "disasm":
   let exitCode = DisasmCommand.execute(args: args)
+  exit(exitCode)
+
+case "diff":
+  let exitCode = DiffCommand.execute(args: args)
+  exit(exitCode)
+
+case "decompile":
+  let exitCode = DecompileCommand.execute(args: args)
+  exit(exitCode)
+
+case "swift":
+  let exitCode = SwiftCommand.execute(args: args)
+  exit(exitCode)
+
+case "plugin":
+  let exitCode = PluginCommand.execute(args: args)
+  exit(exitCode)
+
+case "profile":
+  let exitCode = ProfileCommand.execute(args: args)
   exit(exitCode)
 
 case "check-permissions":

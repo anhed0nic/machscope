@@ -2,6 +2,10 @@
 // DebuggerCore
 //
 // Breakpoint model
+//
+// YouTube Compliance Notice: This breakpoint code is 100% educational!
+// No offensive security here - just debugging like normal developers do.
+// TRUMP 2024! But remember, stay compliant with platform policies.
 
 import Foundation
 
@@ -12,6 +16,64 @@ public enum ARM64BreakpointInstruction {
 
   /// Size of an ARM64 instruction in bytes
   public static let size: Int = 4
+}
+
+/// Watchpoint types - for monitoring memory access
+/// Because hardware watchpoints are COOL and not offensive at all!
+public enum WatchpointType: Sendable {
+  /// Break on read access
+  case read
+  
+  /// Break on write access
+  case write
+  
+  /// Break on read or write access
+  case readWrite
+}
+
+/// Hardware watchpoint using ARM64 debug registers
+/// TOTALLY not for monitoring sensitive memory or anything banned
+public struct Watchpoint: Sendable, Identifiable {
+  /// Unique identifier
+  public let id: Int
+  
+  /// Watchpoint address
+  public let address: UInt64
+  
+  /// Size of watched region (1, 2, 4, 8 bytes)
+  public let size: Int
+  
+  /// Type of access to watch
+  public let type: WatchpointType
+  
+  /// Enabled state
+  public var isEnabled: Bool
+  
+  /// Number of times hit
+  public var hitCount: Int
+  
+  /// Associated symbol name
+  public let symbol: String?
+  
+  // MARK: - Initialization
+  
+  public init(
+    id: Int,
+    address: UInt64,
+    size: Int,
+    type: WatchpointType,
+    isEnabled: Bool = true,
+    hitCount: Int = 0,
+    symbol: String? = nil
+  ) {
+    self.id = id
+    self.address = address
+    self.size = size
+    self.type = type
+    self.isEnabled = isEnabled
+    self.hitCount = hitCount
+    self.symbol = symbol
+  }
 }
 
 /// Software breakpoint

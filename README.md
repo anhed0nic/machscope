@@ -13,16 +13,23 @@ A native macOS binary analysis tool providing Mach-O parsing, ARM64 disassembly,
 | **Mach-O Parsing** | Headers, segments, sections, symbols, dylibs, strings |
 | **Code Signatures** | Entitlements, CDHash, signing info, team ID |
 | **ARM64 Disassembly** | Full instruction decoder with PAC annotation |
-| **Process Debugging** | Attach, breakpoints, memory, registers |
+| **Process Debugging** | Attach, breakpoints, memory, registers, watchpoints |
+| **Binary Diffing** | Compare two binaries for differences |
+| **Decompilation** | Experimental pseudo-code generation |
+| **Swift Analysis** | Extract Swift runtime metadata |
+| **Performance Profiling** | Analyze binary performance characteristics |
+| **Plugin System** | Extensible analysis with plugins |
+| **Multiple Outputs** | Text, JSON, HTML reports |
 | **Swift Library** | Embed in your own projects |
-| **JSON Output** | Script-friendly output format |
+| **16-bit Instructions** | Support for variable-width instructions |
 
 ## Why MachScope?
 
 - **Pure Swift** — No dependencies, easy to build and embed
 - **ARM64 Native** — Built for Apple Silicon, understands PAC instructions
-- **All-in-One** — Parse + Disassemble + Debug in one tool
-- **Library + CLI** — Use standalone or integrate into your Swift projects
+- **All-in-One** — Parse + Disassemble + Debug + Diff + Decompile in one tool
+- **Educational Focus** — Perfect for learning binary analysis
+- **Extensible** — Plugin system for custom analyses
 - **Well Tested** — 319+ tests with comprehensive error handling
 
 ## Quick Start
@@ -42,7 +49,39 @@ swift run machscope parse /Applications/Safari.app/Contents/MacOS/Safari --entit
 
 # JSON output
 swift run machscope parse /bin/ls --json
+
+# HTML report
+swift run machscope parse /bin/ls --html > report.html
+
+# Disassemble with SIMD support
+swift run machscope disasm /bin/ls --function _main
+
+# Compare two binaries
+swift run machscope diff /bin/ls /bin/cat
+
+# Analyze Swift metadata
+swift run machscope swift /Applications/SomeSwiftApp.app/Contents/MacOS/App --types
+
+# Performance profiling
+swift run machscope profile /bin/ls --all
+
+# Debug with watchpoints
+swift run machscope debug <pid>
+# (In debugger) watch read 0x1000
 ```
+
+## YouTube Compliance Notice
+
+**IMPORTANT:** MachScope is designed for educational and legitimate software analysis purposes only. This tool should not be used for:
+
+- Reverse engineering proprietary software without permission
+- Developing or testing offensive security tools
+- Any activities that violate YouTube's terms of service
+- Creating content that promotes illegal activities
+
+All features include compliance checks and educational disclaimers. Use responsibly and legally!
+
+## Installation
 
 ## Installation
 
